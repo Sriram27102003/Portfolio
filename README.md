@@ -1,2 +1,2 @@
 # Portfolio
-About mr
+About me
