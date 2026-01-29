@@ -5,6 +5,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [isScrolled, setIsScrolled] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,7 +48,14 @@ export default function App() {
         top: offsetPosition,
         behavior: 'smooth'
       });
+      
+      // Close mobile menu after clicking
+      setIsMobileMenuOpen(false);
     }
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
@@ -72,7 +80,8 @@ export default function App() {
             <span className="logo-full">SRIRAM</span>
           </button>
           
-          <div className="nav-links">
+          {/* Desktop Navigation */}
+          <div className="nav-links desktop-nav">
             {['About', 'Projects', 'Skills', 'Contact'].map((item) => (
               <button
                 key={item}
@@ -80,6 +89,36 @@ export default function App() {
                 className={`nav-link ${activeSection === item.toLowerCase() ? 'active' : ''}`}
               >
                 <span className="nav-number">0{['About', 'Projects', 'Skills', 'Contact'].indexOf(item) + 1}</span>
+                {item}
+              </button>
+            ))}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            className="mobile-menu-btn"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+          >
+            <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}>
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <div className={`mobile-nav ${isMobileMenuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-content">
+            {['About', 'Projects', 'Skills', 'Contact'].map((item, index) => (
+              <button
+                key={item}
+                onClick={() => scrollToSection(item.toLowerCase())}
+                className={`mobile-nav-link ${activeSection === item.toLowerCase() ? 'active' : ''}`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <span className="mobile-nav-number">0{index + 1}</span>
                 {item}
               </button>
             ))}
@@ -131,7 +170,6 @@ export default function App() {
       <section id="about" className="about-section">
         <div className="section-container">
           <div className="section-header">
-            {/* <span className="section-number">01</span> */}
             <h2 className="section-title">About Me</h2>
           </div>
 
@@ -165,21 +203,6 @@ export default function App() {
                 </div>
               </div>
             </div>
-
-            {/* <div className="about-stats">
-              <div className="stat-card">
-                <div className="stat-number">4+</div>
-                <div className="stat-label">Years of Coding</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">15+</div>
-                <div className="stat-label">Projects Built</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">5+</div>
-                <div className="stat-label">Technologies</div>
-              </div>
-            </div> */}
           </div>
         </div>
       </section>
@@ -188,7 +211,6 @@ export default function App() {
       <section id="projects" className="projects-section">
         <div className="section-container">
           <div className="section-header">
-            {/* <span className="section-number">02</span> */}
             <h2 className="section-title">Featured Projects</h2>
           </div>
 
@@ -210,9 +232,9 @@ export default function App() {
             <ProjectCard
               number="03"
               title="Open Source Contributions"
-              description="Added local search capability using docusaurus-plugin-search-local to CNCF’s contributor documentation site."
+              description="Added local search capability using docusaurus-plugin-search-local to CNCF's contributor documentation site."
               tags={['GitHub', 'Docusaurus', 'JavaScript', 'React']}
-              link ="https://github.com/Sriram27102003/Contribute-site"
+              link="https://github.com/Sriram27102003/Contribute-site"
             />
           </div>
         </div>
@@ -222,7 +244,6 @@ export default function App() {
       <section id="skills" className="skills-section">
         <div className="section-container">
           <div className="section-header">
-            {/* <span className="section-number">03</span> */}
             <h2 className="section-title">Technical Arsenal</h2>
           </div>
 
@@ -235,10 +256,6 @@ export default function App() {
               title="AI & ML"
               skills={['TensorFlow', 'PyTorch', 'Scikit-learn', 'OpenCV', 'Keras', 'NumPy']}
             />
-            {/* <SkillCategory
-              title="Backend"
-              skills={['Spring Boot', 'Node.js', 'Express', 'REST APIs', 'GraphQL', 'Microservices']}
-            /> */}
             <SkillCategory
               title="Robotics"
               skills={['ROS', 'Arduino', 'Raspberry Pi', 'Computer Vision', 'Embedded Systems']}
@@ -259,7 +276,6 @@ export default function App() {
       <section id="contact" className="contact-section">
         <div className="section-container">
           <div className="section-header">
-            {/* <span className="section-number">04</span> */}
             <h2 className="section-title">Get In Touch</h2>
           </div>
 
@@ -280,20 +296,20 @@ export default function App() {
               />
               <ContactLink
                 label="LinkedIn"
-                value="https://linkedin.com/in/s-sriram-728945249/"
+                value="s-sriram-728945249"
                 href="https://linkedin.com/in/s-sriram-728945249/"
                 icon="in"
               />
               <ContactLink
                 label="GitHub"
-                value="https://github.com/Sriram27102003"
+                value="Sriram27102003"
                 href="https://github.com/Sriram27102003"
                 icon="<>"
               />
               <ContactLink
                 label="Phone"
                 value="+91 7904948527"
-                href="tel:+91 7904948527"
+                href="tel:+917904948527"
                 icon="☎"
               />
             </div>
@@ -310,7 +326,7 @@ export default function App() {
           </div>
           <div className="footer-right">
             <span className="footer-year">© 2024</span>
-            <span className="footer-location">Bangalore, India</span>
+            <span className="footer-location">Chennai, India</span>
           </div>
         </div>
       </footer>
