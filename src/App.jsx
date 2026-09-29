@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 // SVG Icons
@@ -145,12 +145,42 @@ const navLinks = [
   { id: 'contact', label: 'Contact' }
 ];
 
+// Each section gets a shareable URL hash, e.g. /Portfolio/#Experience
+const hashFor = (id) => {
+  const link = navLinks.find((l) => l.id === id);
+  return link ? `#${link.label}` : '';
+};
+
+const idFromHash = (hash) => {
+  const key = decodeURIComponent(hash.replace(/^#/, '')).toLowerCase();
+  if (!key) return null;
+  const link = navLinks.find((l) => l.id === key || l.label.toLowerCase() === key);
+  return link ? link.id : key === 'home' ? 'home' : null;
+};
+
+const jumpTo = (sectionId, behavior) => {
+  const element = document.getElementById(sectionId);
+  if (!element) return false;
+  const navOffset = 80;
+  const top = sectionId === 'home' ? 0 : element.getBoundingClientRect().top + window.scrollY - navOffset;
+  window.scrollTo({ top, behavior });
+  return true;
+};
+
+const setUrlHash = (id, mode) => {
+  const url = `${window.location.pathname}${window.location.search}${hashFor(id)}`;
+  if (url === `${window.location.pathname}${window.location.search}${window.location.hash}`) return;
+  window.history[mode === 'push' ? 'pushState' : 'replaceState'](null, '', url);
+};
+
 export default function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [expandedRoles, setExpandedRoles] = useState([]);
+  const currentSectionRef = useRef(null);
+  const urlSyncEnabledRef = useRef(false);
 
   const toggleRole = (id) => {
     setExpandedRoles((prev) => (prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]));
@@ -167,14 +197,49 @@ export default function App() {
         const el = document.getElementById(sections[i]);
         if (el && el.offsetTop <= scrollPosition) {
           setActiveSection(sections[i]);
+          // Keep the address bar in step with the section being read
+          if (urlSyncEnabledRef.current && currentSectionRef.current !== sections[i]) {
+            setUrlHash(sections[i], 'replace');
+          }
+          currentSectionRef.current = sections[i];
           break;
         }
       }
     };
 
+    // Opening a shared link like #Experience jumps straight to that section
+    const initialId = idFromHash(window.location.hash);
+    let handleLoad = null;
+    if (initialId) {
+      // Stop the browser restoring an old scroll position over the jump
+      window.history.scrollRestoration = 'manual';
+      const jumpToInitial = () => {
+        jumpTo(initialId, 'instant');
+        urlSyncEnabledRef.current = true;
+      };
+      setTimeout(jumpToInitial, 0);
+      // Re-align once fonts and images have loaded and shifted the layout
+      if (document.readyState !== 'complete') {
+        handleLoad = jumpToInitial;
+        window.addEventListener('load', handleLoad, { once: true });
+      }
+    } else {
+      urlSyncEnabledRef.current = true;
+    }
+
+    // Browser back/forward between sections
+    const handlePopState = () => {
+      jumpTo(idFromHash(window.location.hash) || 'home', 'smooth');
+    };
+
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('popstate', handlePopState);
+      if (handleLoad) window.removeEventListener('load', handleLoad);
+    };
   }, []);
 
   // Close the mobile menu with Escape
@@ -187,17 +252,10 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [isMobileMenuOpen]);
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const navOffset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+  const scrollToSection = (sectionId, event) => {
+    event?.preventDefault();
+    if (jumpTo(sectionId, 'smooth')) {
+      setUrlHash(sectionId, 'push');
       setIsMobileMenuOpen(false);
     }
   };
@@ -225,8 +283,9 @@ export default function App() {
       {/* Floating Header */}
       <header className={`header-wrapper ${isScrolled ? 'header-scrolled' : ''}`}>
         <nav className="header-nav">
-          <button 
-            onClick={() => scrollToSection('home')} 
+          <a
+            href="#"
+            onClick={(e) => scrollToSection('home', e)}
             className="brand-logo"
             aria-label="Back to top"
           >
@@ -238,20 +297,21 @@ export default function App() {
               height="38"
             />
             <span className="brand-name">SRIRAM</span>
-          </button>
+          </a>
 
           {/* Desktop Navigation */}
           <div className="desktop-nav-items">
             {navLinks.map((item, idx) => (
-              <button
+              <a
                 key={item.id}
-                onClick={() => scrollToSection(item.id)}
+                href={hashFor(item.id)}
+                onClick={(e) => scrollToSection(item.id, e)}
                 className={`nav-button ${activeSection === item.id ? 'active' : ''}`}
                 aria-current={activeSection === item.id ? 'true' : undefined}
               >
                 <span className="nav-index">0{idx + 1}</span>
                 <span className="nav-text">{item.label}</span>
-              </button>
+              </a>
             ))}
           </div>
 
@@ -287,14 +347,15 @@ export default function App() {
           <div className="mobile-menu-drawer" id="mobile-menu">
             <div className="mobile-menu-links">
               {navLinks.map((item, idx) => (
-                <button
+                <a
                   key={item.id}
-                  onClick={() => scrollToSection(item.id)}
+                  href={hashFor(item.id)}
+                  onClick={(e) => scrollToSection(item.id, e)}
                   className={`mobile-nav-item ${activeSection === item.id ? 'active' : ''}`}
                 >
                   <span className="mobile-idx">0{idx + 1}</span>
                   <span className="mobile-txt">{item.label}</span>
-                </button>
+                </a>
               ))}
             </div>
           </div>
@@ -1264,16 +1325,16 @@ export default function App() {
 
           <nav className="footer-center-block" aria-label="Footer">
             {navLinks.map((item) => (
-              <button key={item.id} onClick={() => scrollToSection(item.id)} className="footer-nav-link">
+              <a key={item.id} href={hashFor(item.id)} onClick={(e) => scrollToSection(item.id, e)} className="footer-nav-link">
                 {item.label}
-              </button>
+              </a>
             ))}
             <a href={RESUME_URL} target="_blank" rel="noopener noreferrer" className="footer-nav-link">Resume</a>
           </nav>
 
           <div className="footer-right-block">
             <button 
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+              onClick={() => scrollToSection('home')}
               className="back-to-top-btn"
             >
               <span>Back to Top</span>
