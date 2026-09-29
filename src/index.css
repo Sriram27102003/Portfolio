@@ -1,68 +1,106 @@
+/* ==========================================================================
+   GLOBAL RESET & DESIGN TOKENS (WARM LINEN & EDITORIAL SAGE PALETTE)
+   ========================================================================== */
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Warm Linen & Paper Palette (sampled from user image) */
+  --bg-main: #f3f0e9;
+  --bg-secondary: #eae5dc;
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-card-hover: #ffffff;
+  --bg-glass: rgba(243, 240, 233, 0.82);
+  --bg-chip: #e8e4dc;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Typography Colors */
+  --text-primary: #171614;
+  --text-secondary: #524f48;
+  --text-muted: #78746c;
+  --text-faint: #a8a39a;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  /* Editorial Accent Colors */
+  --accent-green: #476556;
+  --accent-green-dark: #31493d;
+  --accent-green-light: rgba(71, 101, 86, 0.12);
+  --accent-green-border: rgba(71, 101, 86, 0.35);
+
+  /* Lines & Borders */
+  --border-subtle: #dfdacf;
+  --border-card: #dfdacf;
+  --border-highlight: #476556;
+
+  /* Typography */
+  --font-heading: 'Newsreader', 'Instrument Serif', Georgia, serif;
+  --font-body: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Container Max Width */
+  --container-max: 1200px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  background-color: var(--bg-main);
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  font-family: var(--font-body);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.65;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4cfc4;
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b5b0a5;
+}
+
+/* Selection */
+::selection {
+  background: rgba(71, 101, 86, 0.2);
+  color: #171614;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  border: none;
+  background: none;
+  color: inherit;
 }
